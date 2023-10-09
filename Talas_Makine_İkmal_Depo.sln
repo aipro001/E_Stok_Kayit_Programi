@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Talas_Makine_İkmal_Depo", "Talas_Makine_İkmal_Depo\Talas_Makine_İkmal_Depo.csproj", "{A0A6DA27-BA53-47B6-8E27-C03BA1635777}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "E-Stok Kayıt", "E-Stok Kayıt\E-Stok Kayıt.vdproj", "{01AAF8B1-D8BB-49A9-AB8E-4AC547ED79A3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0A6DA27-BA53-47B6-8E27-C03BA1635777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0A6DA27-BA53-47B6-8E27-C03BA1635777}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0A6DA27-BA53-47B6-8E27-C03BA1635777}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0A6DA27-BA53-47B6-8E27-C03BA1635777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01AAF8B1-D8BB-49A9-AB8E-4AC547ED79A3}.Debug|Any CPU.ActiveCfg = Debug
+		{01AAF8B1-D8BB-49A9-AB8E-4AC547ED79A3}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4FC04CD7-B2CF-40AB-B289-C265341E602F}
+	EndGlobalSection
+EndGlobal

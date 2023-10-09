@@ -1,0 +1,244 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Microsoft.Office.Interop.Excel;
+using QRCoder;
+using System.Windows.Controls;
+using Image = System.Drawing.Image;
+using Org.BouncyCastle.Ocsp;
+
+namespace Talas_Makine_İkmal_Depo
+{
+    public partial class FrmMalzemeGirisKaydi : Form
+    {
+        public FrmMalzemeGirisKaydi()
+        {
+            InitializeComponent();
+        }
+
+        BaglantiSinifi bgl = new BaglantiSinifi();
+        //SqlConnection baglanti = new SqlConnection(@"Data Source=DESKTOP-VDBH89Q\SQLEXPRESS;Initial Catalog=TalasMakineİkmalDepo;Integrated Security=True");
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FrmAnaMenu fr = new FrmAnaMenu();
+            fr.Show();
+            this.Hide();
+        }
+
+        void Listele()
+        {
+            SqlConnection baglanti = new SqlConnection(bgl.Adres);
+            baglanti.Open();
+            SqlCommand komut = new SqlCommand("Select * From Tbl_MalzemeGiris", baglanti);
+            SqlDataAdapter da = new SqlDataAdapter(komut);
+            System.Data.DataTable dt = new System.Data.DataTable();
+            da.Fill(dt);
+            dataGridView1.DataSource = dt;
+        }
+
+        private void btnResimYukle_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+            pictureBox4.ImageLocation = openFileDialog1.FileName;
+            txtResim.Text = openFileDialog1.FileName;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Minimized;
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtID.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtGrubu.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtMalzemeAdi.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
+            txtBirim.Text = dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString();
+            txtMiktar.Text = dataGridView1.Rows[e.RowIndex].Cells[4].Value.ToString();
+            dTPGirisTarihi.Text = dataGridView1.Rows[e.RowIndex].Cells[5].Value.ToString();
+            txtTeslimEden.Text = dataGridView1.Rows[e.RowIndex].Cells[6].Value.ToString();
+            txtTeslimAlan.Text = dataGridView1.Rows[e.RowIndex].Cells[7].Value.ToString();
+            txtFirma.Text = dataGridView1.Rows[e.RowIndex].Cells[8].Value.ToString();
+            txtResim.Text = dataGridView1.Rows[e.RowIndex].Cells[9].Value.ToString();
+            pictureBox4.ImageLocation = dataGridView1.Rows[e.RowIndex].Cells[9].Value.ToString();
+        }
+
+        [DllImport("user32.DLL", EntryPoint = "ReleaseCapture")]
+        private extern static void ReleaseCapture();
+
+        [DllImport("user32.DLL", EntryPoint = "SendMessage")]
+        private extern static void SendMessage(System.IntPtr hWnd, int wMsg, int wParam, int IParam);
+        private void FrmMalzemeGirisKaydi_MouseDown(object sender, MouseEventArgs e)
+        {
+            ReleaseCapture();
+            SendMessage(this.Handle, 0x112, 0xf012, 0);
+        }
+
+        private void FrmMalzemeGirisKaydi_Load(object sender, EventArgs e)
+        {
+            Listele();
+        }
+
+        private void txtAra_TextChanged(object sender, EventArgs e)
+        {
+            SqlConnection baglanti = new SqlConnection(bgl.Adres);
+            baglanti.Open();
+            SqlCommand komut = new SqlCommand("Select * From Tbl_MalzemeGiris where MALZEMEADI like '%" + txtAra.Text + "%'", baglanti);
+            SqlDataAdapter da = new SqlDataAdapter(komut);
+            System.Data.DataTable dt = new System.Data.DataTable();
+            da.Fill(dt);
+            dataGridView1.DataSource = dt;
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Maximized;
+        }
+
+        private void btnKaydet_Click_1(object sender, EventArgs e)
+        {
+            if (
+                  txtGrubu.Text == "" || txtMalzemeAdi.Text == "" || txtBirim.Text == "" || txtMiktar.Text == "" || dTPGirisTarihi.Text == "" || txtTeslimEden.Text == "" || txtTeslimAlan.Text == "" || txtFirma.Text == "" ||
+                  txtGrubu.Text == string.Empty || txtMalzemeAdi.Text == string.Empty || txtBirim.Text == string.Empty || txtMiktar.Text == string.Empty || dTPGirisTarihi.Text == string.Empty || txtTeslimEden.Text == string.Empty || txtTeslimAlan.Text == string.Empty || txtFirma.Text == string.Empty
+               )
+            {
+                txtGrubu.BackColor = Color.Yellow;
+                txtMalzemeAdi.BackColor = Color.Yellow;
+                txtBirim.BackColor = Color.Yellow;
+                txtMiktar.BackColor = Color.Yellow;
+                dTPGirisTarihi.BackColor = Color.Yellow;
+                txtTeslimEden.BackColor = Color.Yellow;
+                txtTeslimAlan.BackColor = Color.Yellow;
+                txtFirma.BackColor = Color.Yellow;
+                MessageBox.Show("Sarı Rekli Alanları Boş Geçemezsiniz", "Boş Alan Hatası", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+
+                SqlConnection baglanti = new SqlConnection(bgl.Adres);
+                baglanti.Open();
+                SqlCommand komut = new SqlCommand("insert into Tbl_MalzemeKayit (GRUBU,MALZEMEADI,BIRIM,MIKTAR,GIRISTARIHI,TESLIMEDEN,TESLIMALAN,FIRMA,MALZEMERESMI) " +
+                                                  "VALUES (@P1,@P2,@P3,@P4,@P5,@P6,@P7,@P8,@P9)", baglanti);
+                komut.Parameters.AddWithValue("@p1", txtGrubu.Text);
+                komut.Parameters.AddWithValue("@p2", txtMalzemeAdi.Text);
+                komut.Parameters.AddWithValue("@p3", txtBirim.Text);
+                komut.Parameters.AddWithValue("@p4", txtMiktar.Text);
+                komut.Parameters.AddWithValue("@p5", dTPGirisTarihi.Text);
+                komut.Parameters.AddWithValue("@p6", txtTeslimEden.Text);
+                komut.Parameters.AddWithValue("@p7", txtTeslimAlan.Text);
+                komut.Parameters.AddWithValue("@p8", txtFirma.Text);
+                komut.Parameters.AddWithValue("@p9", txtResim.Text);
+                komut.ExecuteNonQuery();
+                Listele();
+                baglanti.Close();
+                MessageBox.Show("Sisteme Kaydedildi ve QR Kod Oluşturuldu", "Kayıt", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                baglanti.Open();
+                SqlCommand komut1 = new SqlCommand("insert into Tbl_Raporlama (GIRISTARIHI,MALZEMEADI,GRUBU,BIRIM,MIKTAR,TESLIMEDEN,TESLIMALAN,FIRMA) " +
+                                                  "VALUES (@P2,@P4,@P5,@P6,@P7,@P8,@P9,@P10)", baglanti);
+                komut1.Parameters.AddWithValue("@p2", dTPGirisTarihi.Text);
+                komut1.Parameters.AddWithValue("@p4", txtMalzemeAdi.Text);
+                komut1.Parameters.AddWithValue("@p5", txtGrubu.Text);
+                komut1.Parameters.AddWithValue("@p6", txtBirim.Text);
+                komut1.Parameters.AddWithValue("@p7", txtMiktar.Text);
+                komut1.Parameters.AddWithValue("@p8", txtTeslimEden.Text);
+                komut1.Parameters.AddWithValue("@p9", txtTeslimAlan.Text);
+                komut1.Parameters.AddWithValue("@p10", txtFirma.Text);
+                komut1.Parameters.AddWithValue("@p11", txtResim.Text);
+                komut1.ExecuteNonQuery();
+                baglanti.Close();
+
+                string str = "  - ID No: " + txtID.Text + " \n " + " - Grubu: " + txtGrubu.Text + " \n " + " - Malzeme Adı: " + txtMalzemeAdi.Text + " \n " + " - Birim: " + txtBirim.Text + " \n " + " - Miktar: " + txtMiktar.Text + " \n " + " - Giriş Tarihi: " + dTPGirisTarihi.Text + " \n " + " - Teslim Eden: " + txtTeslimEden.Text + " \n " + " - Teslim Alan:" + txtTeslimAlan.Text + " \n " + " - Firma: " + txtFirma.Text;
+                QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(str, QRCodeGenerator.ECCLevel.Q);
+                QRCode qrCode = new QRCode(qrCodeData);
+                Bitmap qrCodeImage = qrCode.GetGraphic(20);
+                pictureBox2.Image = qrCodeImage;
+
+                SaveFileDialog sfd = new SaveFileDialog();//yeni bir kaydetme diyaloğu oluşturuyoruz.
+                sfd.Filter = "jpeg dosyası(*.jpg)|*.jpg|Bitmap(*.bmp)|*.bmp";//.bmp veya .jpg olarak kayıt imkanı sağlıyoruz.
+                sfd.Title = "qrCodeImage";//diğaloğumuzun başlığını belirliyoruz.
+                sfd.FileName = "QR COD";//kaydedilen resmimizin adını 'resim' olarak belirliyoruz.
+                DialogResult sonuç = sfd.ShowDialog();
+                if (sonuç == DialogResult.OK)
+                {
+                    pictureBox2.Image.Save(sfd.FileName);//Böylelikle resmi istediğimiz yere kaydediyoruz.
+                }
+            }
+        }
+
+        private void btnSil_Click_1(object sender, EventArgs e)
+        {
+            SqlConnection baglanti = new SqlConnection(bgl.Adres);
+            baglanti.Open();
+            SqlCommand komut = new SqlCommand("Delete from Tbl_MalzemeKayit where MALZEMEID=@P1", baglanti);
+            komut.Parameters.AddWithValue("@P1", txtID.Text);
+            komut.ExecuteNonQuery();
+            MessageBox.Show("Sistemden Silindi", "Silindi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Listele();
+            baglanti.Close();
+
+            baglanti.Open();
+            SqlCommand komut1 = new SqlCommand("Delete from Tbl_Raporlama where MALZEMEID=@P1", baglanti);
+            komut1.Parameters.AddWithValue("@P1", txtID.Text);
+            komut1.ExecuteNonQuery();
+            baglanti.Close();
+        }
+
+        private void btnGuncelle_Click_1(object sender, EventArgs e)
+        {
+            SqlConnection baglanti = new SqlConnection(bgl.Adres);
+            baglanti.Open();
+            SqlCommand komut = new SqlCommand("update Tbl_MalzemeKayit set GRUBU=@P1,MALZEMEADI=@P2,BIRIM=@P3,MIKTAR=@P4,GIRISTARIHI=@P5,TESLIMEDEN=@P6,TESLIMALAN=@P7,FIRMA=@P8,MALZEMERESMI=@P9 WHERE MALZEMEID=@P10 ", baglanti);
+            komut.Parameters.AddWithValue("@p1", txtGrubu.Text);
+            komut.Parameters.AddWithValue("@p2", txtMalzemeAdi.Text);
+            komut.Parameters.AddWithValue("@p3", txtBirim.Text);
+            komut.Parameters.AddWithValue("@p4", txtMiktar.Text);
+            komut.Parameters.AddWithValue("@p5", dTPGirisTarihi.Text);
+            komut.Parameters.AddWithValue("@p6", txtTeslimEden.Text);
+            komut.Parameters.AddWithValue("@p7", txtTeslimAlan.Text);
+            komut.Parameters.AddWithValue("@p8", txtFirma.Text);
+            komut.Parameters.AddWithValue("@p9", txtResim.Text);
+            komut.Parameters.AddWithValue("@p10", txtID.Text);
+            komut.ExecuteNonQuery();
+            MessageBox.Show("Sistem Güncellendi", "Güncelle", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Listele();
+            baglanti.Close();
+
+            baglanti.Open();
+            SqlCommand komut1 = new SqlCommand("update Tbl_Raporlama set GIRISTARIHI=@P2,MALZEMEADI=@P4,GRUBU=@P5,BIRIM=@P6,MIKTAR=@P7,TESLIMEDEN=@P8,TESLIMALAN=@P9,FIRMA=@P10 WHERE MALZEMEID=@P1 ", baglanti);
+            komut1.Parameters.AddWithValue("@p2", dTPGirisTarihi.Text);
+            komut1.Parameters.AddWithValue("@p4", txtMalzemeAdi.Text);
+            komut1.Parameters.AddWithValue("@p5", txtGrubu.Text);
+            komut1.Parameters.AddWithValue("@p6", txtBirim.Text);
+            komut1.Parameters.AddWithValue("@p7", txtMiktar.Text);
+            komut1.Parameters.AddWithValue("@p8", txtTeslimEden.Text);
+            komut1.Parameters.AddWithValue("@p9", txtTeslimAlan.Text);
+            komut1.Parameters.AddWithValue("@p10", txtFirma.Text);
+            komut1.Parameters.AddWithValue("@p1", txtID.Text);
+            komut1.ExecuteNonQuery();
+            baglanti.Close();
+        }
+
+        private void btnResimYukle_Click_1(object sender, EventArgs e)
+        {
+            openFileDialog1.ShowDialog();
+            pictureBox4.ImageLocation = openFileDialog1.FileName;
+            txtResim.Text = openFileDialog1.FileName;
+        }
+    }
+}
